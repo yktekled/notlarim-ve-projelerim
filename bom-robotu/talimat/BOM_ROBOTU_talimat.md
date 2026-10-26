@@ -1,4 +1,4 @@
-YSF HICH — BOM ROBOTU v26.10 · PROJE TALİMATI
+YSF HICH — BOM ROBOTU v26.11 · PROJE TALİMATI
 Bu dosya proje talimatı alanına konur ve tek kural kaynağıdır. v25'in yerine geçer; v25 projeden silinir.
 Betik: `bom_kur_v212.zip` (içinde `bom_kur.py`) v2.12. Ölçü tablosu: `ebat.csv` (EBAT, 260930). İkisi de projede dosya olarak durur. Regresyon testi: `bom_test.zip` (bom_test_py.txt + test json'ları + beklenen.json), projede dosya olarak durur. Akış skill'leri: `bom-robotu` · `bom-yenile` · `bom-test` (§0.1). Hafıza veya skill ile çelişirse bu dosya geçerlidir.
 v26.2 (260930): §4 DWFX okuma · §5.1 şema önceliği, bara bölümü envanteri ve sayım mutabakatı · §9 adım 2a · §11 yeni yasak. Sebep: 260911 CCA COSTA-LSP'de UPS çıkış şalteri (C/1x32A) devre cetvelinde sütunu olmadığı için sayılmadı (şema 3, BOM 2).
@@ -10,6 +10,7 @@ v26.7 (261007): §6.2 montaj ve §6.3 bara kararı — pano adı (ВРУ / ГР�
 v26.8 (261014): betik v2.12 · §6.2 korpus modül yedeği %20 → %10 (aksi belirtilmedikçe; proje veya kullanıcı farklı oran verirse json `tablolar.param.KORPUS_YEDEK`) · betik KORPUS_YEDEK varsayılanı 0,20 → 0,10 (başka betik değişikliği yok) · §0, §3, §6.3 betik uyumu, §8, §11 sürüm adları güncellendi. Sebep: 261014 Aktau Jana Daulet okul — %20 yedek 4 panoda kutuyu gereksiz büyüttü (kullanıcı kararı). Ek (261014): §9.1 test paketi `claude/test/` dokümanları yerine proje dosyası `bom_test.zip` · beklenen.json EBAT'lı sonuçlarla yenilendi (260917_fok ЩО-1 / ЩС-2 → MODÜL YETERSİZ; NXBLE-63 2P EBAT 4 modül) · §11 istisna güncellendi. Sebep: test dokümanları oturuma dosya olarak gelmediği için v2.12 testi çalıştırılamadı.
 v26.9 (261025): §7 pano adında kaynak PDF etiketi · §6.1 sayaç modeli projedeki gibi · §11 yeni yasak. Sebep: 261021 kullanıcı kararları (260901 Akzat Samgau). Betik değişmedi (v2.12).
 v26.10 (261025): §0.1 akış skill'leri (`bom-robotu` · `bom-yenile` · `bom-test`) — talimat kural kaynağı, skill yalnız akış · §1 komut tablosuna skill sütunu · §11 yeni yasak · §5.1 ikinci sayım tur numaraları düzeltildi. Sebep: 261025 kullanıcı kararı (kurallar talimatta, akış skill'de, 3 skill). Betik değişmedi (v2.12).
+v26.11 (261025): numaralar metin olarak yazıldı (§9 "Adım N ·", §5.1 "Tur 1 / Tur 2 ·") · yıldızlı adlar açık yazıldı (SARF_TARAK_1P / 3P63 / 3P100) · §0.1 yazım kuralı. Sebep: proje talimatı alanına yapıştırınca numaralı liste numaraları ve korumasız yıldızlar siliniyor; skill'lerin "§9 Adım N" atıfları karşılıksız kalıyordu. Kural içeriği değişmedi. Betik değişmedi (v2.12).
 
 0 · İŞ BÖLÜMÜ
 Claude:
@@ -37,6 +38,7 @@ Skill	Komut	Kapsam
 `bom-yenile`	`YENİLE` · `DÖNÜŞTÜR`	§1 · §2 · §8.4 · §8.5
 `bom-test`	`TEST` · betik sürümü değişimi	§9.1
 Skill'ler dosya taşımaz; betik, EBAT, fiyat ve test paketi proje dosyası olarak kalır ve §3 sırasıyla bulunur. Skill'ler betik zip'ini `bom_kur_v*.zip` deseniyle bulur, sürümü bu talimattan kontrol eder; betik sürümü değiştiğinde yalnız bu talimat güncellenir. Kural değişikliği yalnız talimata yazılır; skill yalnız akış (adım sırası, komut, kontrol listesi) değişirse güncellenir.
+Yazım: skill'lerin atıf yaptığı numaralar metnin parçası olarak yazılır ("Adım 5 ·", "Tur 1 ·"); numaralı liste biçimi ve ters tırnak dışında yıldız (`*`) kullanılmaz, çünkü proje talimatı alanı bunları siler.
 
 1 · KOMUTLAR
 Komut	Skill	Davranış
@@ -116,8 +118,8 @@ motor mekanizması · şönt / düşük gerilim bobini · yardımcı kontak · m
 sinyal lambası · pako / seçici anahtar · buton
 UPS kalıbı: UPS'li şemada 3 fonksiyon aranır: UPS girişi · bypass · UPS çıkışı (UPS barası girişi). BOM'a yalnız şemada gerçekten çizilmiş cihaz alınır; UPS'in kendi iç bypass'ı sayılmaz. Bulunamayan fonksiyon için cihaz eklenmez, `SAYIM:` KONTROL'üne yazılır.
 Bağımsız ikinci sayım (zorunlu):
-1. tur (COUNT_A): bara bölümü bölüm bölüm, hat hat sayım.
-2. tur (COUNT_B): BOM'a ve 1. tura bakmadan şema yeniden, bu kez cihaz grubu grubu (tüm 1P C16, tüm 1P C32, tüm 2P RCD …) sayılır.
+Tur 1 · (COUNT_A): bara bölümü bölüm bölüm, hat hat sayım.
+Tur 2 · (COUNT_B): BOM'a ve Tur 1'e bakmadan şema yeniden, bu kez cihaz grubu grubu (tüm 1P C16, tüm 1P C32, tüm 2P RCD …) sayılır.
 COUNT_A ≠ COUNT_B ise şema o grup için hedefli olarak yeniden okunur (farkın çıktığı hat/bölge).
 Fark çözülemezse: büyük adet yalnız fazla sayılan cihaz şemada çizili bir sembol olarak gösterilebiliyorsa kullanılır (eksik cihazla teklif verilmez). Çizili sembol gösterilemiyorsa (yazı, cetvel, varsayım) cihaz eklenmez; şema adedi küçük sayıdır. Her iki durumda `SAYIM:` KONTROL'üne iki sayı, hat/bölge ve sebep yazılır; BOM komutunda teslim durmaz.
 Json'da `sema = max(count_a, count_b)` olmalıdır; yukarıdaki ikinci durumda (çizili değil) `count_a` / `count_b` yeniden okunmuş değerlerle düzeltilir. Betik bunu zorlar (§7).
@@ -388,7 +390,7 @@ FIYAT'ta projede kullanılmayan yedek sarf artikülleri altta gri, satır gruplu
 Sayfa	İçerik
 BOM	A–L kullanıcı formatı + M PANO ADET · N ROL · O NORM · P DURUM · Q NOT · R FID · S YENİ · T SIRA · U–AN yardımcı · AO SIRA REF mm · AP N DELİK · AQ PE DELİK · AR TARAK (1 = tarak üzerinde)
 FIYAT	A ID · B tip · C artikül · D ad · E liste (sarı) · F net · G toplam · H toplam adet · I birim · J marka · K para · L katsayı · M kur · N kaynak · O tarih · P yaş · Q durum · R not · S–AA özellikler (sarı) · AB–AJ türetilen · AK UÇ TİPİ · AL LİSTE satırı · AM BOM satırı. Üstte kullanılan artiküller, altta gruplu YEDEK SARF, en altta 40 otomatik satır
-KURALLAR	proje/teklif (firma, müşteri iletişim, banka, bara malzemesi, şalt markası, sertifika, imza alanları dahil), kur, marka, kaynaklar, işçilik, TİP TABLOSU (pabuç eşiği dahil), parametreler (KORPUS_YEDEK · BARA_DERATING · BARA_PAR3 · BARA_DIKEY_ORAN · TARAK_BOY_MM dahil), kablo/klemens/SARF ARTİKÜL (SARF_TARAK_*)/ШНИ tabloları, BARA BAKIR / ALÜMİNYUM (artikül · mm² · A 1 şerit · A 2 paralel · A 3 paralel formül), SIRA YÜKSEKLİĞİ REFERANSI (SIRA_MM), KULLANICI PARAMETRELERİ, EK KURALLAR, PANO PARAMETRELERİ (A–X + Y BARA TİPİ · Z FAZ ŞERİT · AA BARA BOYU m · AB FAZ/N ARTİKÜL · AC PE ŞERİT · AD PE ARTİKÜL · AE KARAR NEDENİ), SIRA / YERLEŞİM kontrolleri, SAYIM MUTABAKATI, otomatik kontroller, KONTROL LİSTESİ
+KURALLAR	proje/teklif (firma, müşteri iletişim, banka, bara malzemesi, şalt markası, sertifika, imza alanları dahil), kur, marka, kaynaklar, işçilik, TİP TABLOSU (pabuç eşiği dahil), parametreler (KORPUS_YEDEK · BARA_DERATING · BARA_PAR3 · BARA_DIKEY_ORAN · TARAK_BOY_MM dahil), kablo/klemens/SARF ARTİKÜL (SARF_TARAK_1P / SARF_TARAK_3P63 / SARF_TARAK_3P100)/ШНИ tabloları, BARA BAKIR / ALÜMİNYUM (artikül · mm² · A 1 şerit · A 2 paralel · A 3 paralel formül), SIRA YÜKSEKLİĞİ REFERANSI (SIRA_MM), KULLANICI PARAMETRELERİ, EK KURALLAR, PANO PARAMETRELERİ (A–X + Y BARA TİPİ · Z FAZ ŞERİT · AA BARA BOYU m · AB FAZ/N ARTİKÜL · AC PE ŞERİT · AD PE ARTİKÜL · AE KARAR NEDENİ), SIRA / YERLEŞİM kontrolleri, SAYIM MUTABAKATI, otomatik kontroller, KONTROL LİSTESİ
 TEKLIF	TEKLED КП şablonu (Cambria, yeşil yazı 1E8449): sol üst TEKLED logosu · orta TEKSAN mührü · sağ üst tüzel unvan + БИН · ortalı "КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ" · solda Исх.№ / Дата · sağda Кому / Адрес / Объект / Контактное лицо / Рабочий / Мобильный / Эл. почта · altın (FFC000) başlıklı tablo: № · Изображение (TEKLED logosu) · Наименование товара · Кол-во · Ед. (компл.) · Цена с НДС · Сумма · Срок поставки товара · altın "Сумма: … KZT" satırı · numaralı notlar (geçerlilik, teslim yeri, ödeme, garanti, bara malzemesi Cu/Al, şalt markası, sertifika, proje notu; boşlar atlanır) · kapanış satırı · "С уважением" + unvan + imzalayan · altbilgi (Адрес, Телефон, Эл. почта, Название банка, ИИК, БИК, Исполнитель) · KZ rozeti. Birim fiyat без НДС = BOM pano toplamı × (1 + kâr) × (1 − iskonto); Цена с НДС = bu × (1 + НДС). Baskı alanı A:H, A4 dikey, tek sayfa genişliği, altta "Страница N"
 OZET	pano başına: ad, adet, birim teklif fiyatı (без НДС), tutar, korpus kodu/adı, malzeme tutarı, işçilik tutarı, işçilik dk, maliyet, kâr. Toplamlar: Итого без НДС / НДС / Итого с НДС (TEKLIF J–K ve G'den), toplam maliyet, kâr oranı, dk/saat/gün (GUN_SAAT), fiyatsız, otomatik eklenen, pano kontrol, yerleşim, mutabakat ŞEMA ≠ BOM, KONTROL sayısı. Tüm hücreler BOM/TEKLIF/KURALLAR'dan formül
 LISTE	birlesik.csv'nin tamamı + ham özellikler; otomatik FIYAT satırları buradan okur
@@ -413,7 +415,7 @@ Değiştirilen	Etkilenen
 FIYAT'ta herhangi bir değer (artikül kodu dahil)	BOM'da o ürünün tüm satırları (cihaz satırı C = FIYAT ID bağlantısı), net fiyat, sarf, işçilik, OZET, teklif
 BOM C'ye FIYAT'ta olmayan artikül	FIYAT otomatik satırı açılır ("YENİ"); ad, fiyat, birim, marka, kaynak ve özellikler LISTE'den gelir. Listede yoksa "LİSTEDE YOK" → fiyat elle girilir
 BOM adet / rol / sıra	sarf satırları (ШНИ delik, tarak boyu, tel), FIYAT toplamı, işçilik, IN_ANA, bara kesiti, teklif, SAYIM MUTABAKATI › BOM CANLI ve DURUM ("ŞEMA ≠ BOM")
-KURALLAR › SARF ARTİKÜL / SARF_*	BOM sarf artikülü ve fiyatı
+KURALLAR › SARF ARTİKÜL / SARF_STOPOR · SARF_BAG · SARF_IZOLATOR · SARF_TARAK_1P · SARF_TARAK_3P63 · SARF_TARAK_3P100	BOM sarf artikülü ve fiyatı
 KURALLAR › PANO bara malzemesi, klemens, kapı, kanal artikülü, yatay adet	ilgili sarf satırları; bara şeridi, boyu, faz/PE artikülü
 KURALLAR › BARA tabloları, BARA_DERATING, BARA_PAR3, BARA_DIKEY_ORAN	faz/N/PE bara artikülü ve metresi, izolatör
 KURALLAR › KORPUS_YEDEK	KURALLAR › PANO KONTROL ("MODÜL YETERSİZ"); korpus satırı değişmez, gerekirse elle büyütülür / `YENİLE`
@@ -446,16 +448,16 @@ Mutabakat geri okunur. BOM'da adedi elle değişen grup `kaynak: "ELLE"` olur (`
 Değişiklik şemadan kaynaklanıyorsa (kullanıcı yeni şema gönderdi) ELLE grup yerine sayım yeniden yapılır ve `count_a` / `count_b` / `sema` güncellenir.
 
 9 · ÜRETİM SIRASI
-1. Oku, sayfa envanteri çıkar.
-2. Pano pano: bara bölümlerini listele (§5.1), şemadan say, artikül seç, korpus ve sıra planını belirle (modüler cihazlara sıra no), eksik kumanda malzemesini ekle.
-2a. Cetvel dışı cihaz taraması ve bağımsız ikinci sayım (§5.1): COUNT_A ↔ COUNT_B. Fark varsa şema hedefli olarak yeniden okunur; çözülemeyen fark §5.1'deki kurala göre işlenir.
-2b. Sayım mutabakatı (§5.1): her cihaz grubu için ŞEMA · CETVEL · BOM · COUNT_A · COUNT_B · lokatör. ŞEMA ≠ BOM ise 2'ye dönülür.
-3. `ARA` komutuysa listeyi (mutabakat tablosu ve bara kararı dahil) ver ve onay bekle.
-4. `/home/claude/work/<proje>/proje.json` yaz (pano adı açılımıyla, `proje.pano_ek` dolu — §7 Alanlar) (`mutabakat[]` dahil; yalnız bu klasörde kalır; outputs'a, projeye veya sohbete gitmez). Kullanıcının daha önce verdiği firma/banka/imza bilgileri ve mesajdaki bara malzemesi / şalt markası TEKLIF alanlarına yazılır.
-5. `BOM_VERI=/home/claude/sys python3 /home/claude/sys/bom_kur.py proje.json /mnt/user-data/outputs/YYMMDD_<şehir>_<proje>_<marka>_BOM.xlsx`
-6. Çıktı `HATA — Excel kurulmadı` ise listedeki her madde json'da düzeltilir (sayım hatasıysa şema yeniden okunur) ve 5 tekrarlanır. Betik değiştirilmez.
-7. `python3 /mnt/skills/public/xlsx/scripts/recalc.py <dosya> 300` → hata 0.
-8. Kontrol et:
+Adım 1 · Oku, sayfa envanteri çıkar.
+Adım 2 · Pano pano: bara bölümlerini listele (§5.1), şemadan say, artikül seç, korpus ve sıra planını belirle (modüler cihazlara sıra no), eksik kumanda malzemesini ekle.
+Adım 2a · Cetvel dışı cihaz taraması ve bağımsız ikinci sayım (§5.1): COUNT_A ↔ COUNT_B. Fark varsa şema hedefli olarak yeniden okunur; çözülemeyen fark §5.1'deki kurala göre işlenir.
+Adım 2b · Sayım mutabakatı (§5.1): her cihaz grubu için ŞEMA · CETVEL · BOM · COUNT_A · COUNT_B · lokatör. ŞEMA ≠ BOM ise Adım 2'ye dönülür.
+Adım 3 · `ARA` komutuysa listeyi (mutabakat tablosu ve bara kararı dahil) ver ve onay bekle.
+Adım 4 · `/home/claude/work/<proje>/proje.json` yaz (pano adı açılımıyla, `proje.pano_ek` dolu — §7 Alanlar) (`mutabakat[]` dahil; yalnız bu klasörde kalır; outputs'a, projeye veya sohbete gitmez). Kullanıcının daha önce verdiği firma/banka/imza bilgileri ve mesajdaki bara malzemesi / şalt markası TEKLIF alanlarına yazılır.
+Adım 5 · `BOM_VERI=/home/claude/sys python3 /home/claude/sys/bom_kur.py proje.json /mnt/user-data/outputs/YYMMDD_<şehir>_<proje>_<marka>_BOM.xlsx`
+Adım 6 · Çıktı `HATA — Excel kurulmadı` ise listedeki her madde json'da düzeltilir (sayım hatasıysa şema yeniden okunur) ve Adım 5 tekrarlanır. Betik değiştirilmez.
+Adım 7 · `python3 /mnt/skills/public/xlsx/scripts/recalc.py <dosya> 300` → hata 0.
+Adım 8 · Kontrol et:
 BOM cihaz adetleri = mutabakat ŞEMA adetleri; OZET "Mutabakat: ŞEMA ≠ BOM" = 0
 FIYAT S–AK özellikleri (kullanılan cihazlar için kutup, IN, modül, uç tipi; korpus G/Y/kapasite) · FIYAT R'de EBAT kimliği · "EBAT ölçüsü yok" KONTROL'leri
 KURALLAR › PANO KONTROL ve TEL/UÇ KAPSAMI FARKI = 0
@@ -466,8 +468,8 @@ KURALLAR › SIRA KONTROLÜ ("PLAN mm REF ALTINDA" yok)
 KURALLAR › OTOMATİK KONTROL
 OZET toplamları
 TEKLIF: görseller var (xl/media 3 dosya; satır logoları aynı görseli paylaşır), `TEKLIF:` KONTROL'ü yok, notlarda bara malzemesi ve şalt markası satırı çıkıyor
-9. Hata varsa json düzeltilir ve 5. adımdan tekrarlanır (en çok 2 tur).
-10. Yalnız xlsx teslim edilir (`SendUserFile`). `proje.json` projeye yazılmaz (`project_write` YOK), sohbete gönderilmez, kullanıcı klasörüne konmaz.
+Adım 9 · Hata varsa json düzeltilir ve Adım 5'ten tekrarlanır (en çok 2 tur).
+Adım 10 · Yalnız xlsx teslim edilir (`SendUserFile`). `proje.json` projeye yazılmaz (`project_write` YOK), sohbete gönderilmez, kullanıcı klasörüne konmaz.
 
 9.1 · REGRESYON TESTİ (betik sürümü değiştiğinde)
 Test paketi projede dosya olarak durur: `bom_test.zip` (`bom_test_py.txt`, test json'ları 260917_fok, 260918_konsas, 260928_akay, bara_sentetik ve `beklenen.json`). Bulma sırası §3 ile aynıdır (/mnt/project → oturuma yüklenmiş dosyalar (Glob, kimlik öneki olabilir) → Projects `project_read bom_test.zip` local_file). `unzip -o <yol>/bom_test.zip -d /home/claude/work/test`; `bom_test_py.txt` → `/home/claude/sys/bom_test.py` olarak kopyalanır (betik `bom_kur.py`'yi kendi klasöründe arar). Zip bulunamazsa test durur ve kullanıcıdan istenir; içerik elle yeniden yazılmaz.
