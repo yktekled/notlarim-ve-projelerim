@@ -13,6 +13,12 @@ Kolon şeması (bom-workflow):
   I=Кол.  J=Ед.изм  K=завод(marka)  L=malz tutar  M=mal grup  N=srk euro  O=oguzhan
   Pano satırı: J içinde "компл" → E=pano adı, I=pano adedi.
   Fiyat kolonları (F,G,H,L,N,O) ÇIKTIYA ALINMAZ.
+
+BOM robotu (bom_kur.py v2.x) düzeni otomatik tanınır (1. satırda "malzeme" başlığı); kolonlar başlık adından
+bulunur (malzeme · Артикул · Номенклатура · Кол-во · Ед.изм · завод), fiyat kolonları silinmiş kopyalar da okunur.
+  Standart: A=pano adı  B=malzeme tipi  C=Артикул  D=Номенклатура  E–G=fiyat  H=Кол-во  I=Ед.изм  J=marka
+  Pano satırı: I içinde "компл" → D=pano adı, H=pano adedi.
+--sayfa verilmezse sırayla "fiyat burda", "BOM", ilk sayfa okunur.
 """
 import json, re, sys, argparse
 from datetime import date
@@ -61,6 +67,22 @@ E_REGEX = [
     ('role',      r'реле|таймер|nkg|nhp|фотореле|rm4|nxj|импульсн'),
     ('sarf',      r'шина|изолятор|клемм|din|дин-рейк|кабел\w*.канал|кабель|провод|пв[13]|наконечник|гильз|шнк|шни|стяжк|маркир'),
 ]
+# BOM robotu (bom_kur.py TIPS) tip kodu → iç kategori; yeni düzende C_MAP'ten önce bakılır
+# (dif = RCBO NXBLE, uzo = УЗО; ats / tanımsız tip Номенклатура regex'ine düşer)
+TIP_MAP = {
+    'korpus': 'korpus', 'mccb': 'mccb', 'oto': 'mcb', 'dif': 'rcbo', 'uzo': 'rccb',
+    'bh': 'rubilnik', 'rubilnik': 'rubilnik', 'ppn': 'sigorta', 'contactor': 'kontaktor',
+    'sayac': 'sayac', 'tt': 'tt', 'lamb': 'lamba', 'indicator': 'lamba', 'button': 'buton',
+    'perekluchatel': 'secici', 'rele': 'role', 'timer': 'role', 'avr_rele': 'role', 'rn': 'role',
+    'fotorele': 'role',
+    'motor': 'aksesuar', 'shunt': 'aksesuar', 'kilit': 'aksesuar', 'kontak': 'aksesuar', 'krm': 'aksesuar',
+    'aksesuar': 'aksesuar', 'rozetka': 'aksesuar', 'stable': 'aksesuar', 'condencator': 'aksesuar',
+    'bara': 'sarf', 'nbara': 'sarf', 'izolator': 'sarf', 'kanal': 'sarf', 'kablo': 'sarf', 'klemens': 'sarf',
+    'yuksuk': 'sarf', 'pabuc': 'sarf', 'bag': 'sarf', 'tarak': 'sarf',
+}
+# eski şablon kolonları: tip, artikül, ad, adet, birim, marka, ek ad (B); yeni düzen başlıktan bulunur (yeni_duzen)
+DUZEN_ESKI = dict(tip='C', art='D', ad='E', adet='I', birim='J', marka='K', ad2='B')
+
 DEVICE_CATS = {'mccb', 'mcb', 'rccb', 'rcbo', 'rubilnik', 'kontaktor', 'termik', 'opn', 'sigorta',
                'sayac', 'tt', 'lamba', 'buton', 'secici', 'vfd', 'role'}
 DOOR_CATS = {'lamba', 'buton', 'secici'}
@@ -135,22 +157,48 @@ def parametre_cek(text):
     return p
 
 
+def yeni_duzen(ws):
+    """BOM robotu (bom_kur.py) düzeni: 1. satırda "malzeme" başlığı. Kolonlar başlık adından bulunur
+    (fiyat kolonları silinmiş "onay dosyası için" kopyaları da okunur). Değilse None."""
+    bas = {norm(c.value).lower(): c.column_letter for c in ws[1] if norm(c.value)}
+    if 'malzeme' not in bas:
+        return None
+    bul = lambda *on: next((h for b, h in bas.items() if b.startswith(on)), None)
+    dz = dict(tip=bas['malzeme'], art=bul('артикул'), ad=bul('номенклатура'), adet=bul('кол'),
+              birim=bul('ед'), marka=bul('завод'), ad2=None)
+    return dz if all(dz[k] for k in ('art', 'ad', 'adet', 'birim')) else None
+
+
 def oku(xlsx, sayfa=None):
     wb = openpyxl.load_workbook(xlsx, data_only=True)
-    ws = wb[sayfa] if sayfa else wb.worksheets[0]
+    if sayfa:
+        ws = wb[sayfa]
+    else:
+        ad = next((s for s in ('fiyat burda', 'BOM') if s in wb.sheetnames), None)
+        ws = wb[ad] if ad else wb.worksheets[0]
+    dz = yeni_duzen(ws)
+    yeni = dz is not None
+    dz = dz or DUZEN_ESKI
+
+    def kat(tip, ad):
+        t = norm(tip).lower()
+        if yeni and t in TIP_MAP:
+            return TIP_MAP[t], 'C'
+        return kategori(tip, ad)
+
     panolar, hatalar = [], []
     cur = None
     for r in range(1, ws.max_row + 1):
-        v = {col: ws[f'{col}{r}'].value for col in 'ABCDEFGHIJK'}
-        B, C, D, E, I, J, K = (v[c] for c in 'BCDEIJK')
-        if all(norm(v[c]) == '' for c in 'BCDEIJ'):
+        g = lambda k: ws[f'{dz[k]}{r}'].value if dz[k] else None
+        B, C, D, E, I, J, K = g('ad2'), g('tip'), g('art'), g('ad'), g('adet'), g('birim'), g('marka')
+        if all(norm(x) == '' for x in (B, C, D, E, I, J)):
             continue
         txt = (norm(B) + ' ' + norm(E)).lower()
         if re.search(r'итого|toplam|total|всего', txt) and not norm(D):
             continue
         if r <= 2 and re.search(r'наименование|номенклатура|артикул|row', txt + norm(D).lower()):
             continue                                   # başlık satırı
-        if 'компл' in norm(J).lower() and not norm(D) and kategori(C, '')[0] is None \
+        if 'компл' in norm(J).lower() and not norm(D) and kat(C, '')[0] is None \
                 and not re.search(r'монтажн|montaj|işçilik|работа', txt):
             ad = norm(E) or norm(B)
             try:
@@ -164,7 +212,7 @@ def oku(xlsx, sayfa=None):
         if cur is None:
             hatalar.append(f'Satır {r}: pano başlığından önce malzeme satırı — "{norm(E)}"')
             continue
-        cat, kaynak = kategori(C, E)
+        cat, kaynak = kat(C, E)
         try:
             q = float(I) if I not in (None, '') else None
         except Exception:

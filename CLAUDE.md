@@ -47,5 +47,6 @@ Regresyon testi: `bom_test.zip` → `work/test`'e aç, `bom_test_py.txt` → `$S
 ## Bilinen eksikler
 - `kaynaklar.csv` repoda yok (zorunlu değil).
 - `ezdxf` kurulu değil: DXF şema gelirse önce `pip install ezdxf`.
-- Üretim onay robotu bulutta henüz denenmedi (`reportlab` ve `pdfplumber` kurulu).
+- Üretim onay robotu: `uretim_onay.py` DejaVuSansCondensed fontu ister; yoksa önce `apt-get install -y fonts-dejavu-extra`.
+- `bom_oku.py` hem eski "fiyat burda" şablonunu hem BOM robotu (bom_kur.py) çıktısını okur; `--sayfa` verilmezse "fiyat burda" → "BOM" → ilk sayfa.
 - `proje.json` çalışma dosyasıdır; repoya commit edilmez, kullanıcıya gönderilmez (BOM talimatı §11).
