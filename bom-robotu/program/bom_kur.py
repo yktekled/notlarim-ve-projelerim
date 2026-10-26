@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""YSF HICH BOM kurucu v2.11 (bom_kur_py.txt, talimat v26.5) — sabit betik; oturumda yamalanmaz, yalnız kullanıcı talebiyle sürüm değişir.
+"""YSF HICH BOM kurucu v2.12 (bom_kur_py.txt, talimat v26.8) — sabit betik; oturumda yamalanmaz, yalnız kullanıcı talebiyle sürüm değişir.
   python3 bom_kur.py proje.json cikti.xlsx
   python3 bom_kur.py --yenile duzenli.xlsx proje.json
   python3 bom_kur.py --donustur eski.xlsx proje.json
 Sayfalar: BOM · FIYAT · KURALLAR · TEKLIF · OZET · LISTE
+v2.12 değişiklikleri (kullanıcı talebi, 261014):
+  - KORPUS_YEDEK varsayılanı 0,20 → 0,10 (aksi belirtilmedikçe modüler kapasitede %10 yedek). Proje farklı oran isterse
+    json tablolar.param.KORPUS_YEDEK ile ezilir. Başka değişiklik yok.
 v2.11 değişiklikleri (kullanıcı onayı, 260930 — bara, tarak, normlar):
   - Bara taşıma kapasitesi kullanıcı tablosundan (ELEKTRIK_PANOSU_BAKIR_VE_ALUMINYUM_BARALARI.xlsx › LISTE answer):
     tek şerit · 2 paralel · 3 paralel (= tek × BARA_PAR3 2,25). Yalnız fiyat listesindeki EKT baraları (м). BARA_DERATING = 1
@@ -133,7 +136,7 @@ PARAM = [('DK_UCRET', 100, 'KZT / dk'), ('ISCILIK_KAT', 1.0, 'norm çarpanı'), 
          ('BARA_PAR3', 2.25, '3 paralel şerit kapasitesi = tek şerit ×'), ('BARA_DIKEY_ORAN', 0.70, 'dikey bara = korpus yüksekliği ×'),
          ('BARA_FIRE', 1.10, ''), ('TARAK_BOY_MM', 1000, 'tarak parça boyu mm'),
          ('KORPUS_IC_PAY_MM', 100, 'iç ölçü = dış − pay'), ('KANAL_FIRE', 1.10, ''), ('IZOLATOR_ARALIK_M', 0.5, ''),
-         ('KAPI_TOPRAK_M', 0.5, 'kapı başına 6 mm² kablo'), ('MODUL_MM', 17.5, ''), ('KORPUS_YEDEK', 0.20, 'modül yedeği'),
+         ('KAPI_TOPRAK_M', 0.5, 'kapı başına 6 mm² kablo'), ('MODUL_MM', 17.5, ''), ('KORPUS_YEDEK', 0.10, 'modül yedeği (aksi belirtilmedikçe %10)'),
          ('BAKIM_PAY_MM', None, 'YERLEŞİM: sıralar arası bakım/kablo payı mm — boşsa KONTROL'),
          ('UST_ALT_PAY_MM', None, 'YERLEŞİM: üst + alt toplam pay mm — boşsa KONTROL'),
          ('MONTAJ_PLAKA_PAY_MM', None, 'YERLEŞİM: korpus derinliğinden montaj plakası/ray payı mm — boşsa KONTROL'),
