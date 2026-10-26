@@ -61,6 +61,19 @@ def fmt(v, suf=''):
         v = int(v)
     return f'{v}{suf}'
 
+def yaz(c, x, y, txt, font, size, maxw, hiza='c', minsize=3.6):
+    """Metni maxw genişliğine sığdırarak yazar: önce minsize'a kadar küçültür, yetmezse sonunu '…' ile keser.
+    hiza: 'c' ortalı (x = merkez), 'l' sola (x = sol kenar)."""
+    txt, s = str(txt or ''), size
+    while s > minsize and pdfmetrics.stringWidth(txt, font, s) > maxw:
+        s = round(s - 0.2, 2)
+    if pdfmetrics.stringWidth(txt, font, s) > maxw:
+        while txt and pdfmetrics.stringWidth(txt + '…', font, s) > maxw:
+            txt = txt[:-1]
+        txt = (txt + '…') if txt else ''
+    c.setFont(font, s)
+    (c.drawCentredString if hiza == 'c' else c.drawString)(x, y, txt)
+
 KTL = 'КОНТРОЛЬ'
 # TEKLED logosu (örnek PDF'lerden alındı) — dosya bağımsız çalışma için gömülü
 LOGO_B64 = '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'
@@ -262,18 +275,19 @@ class Doc:
             x += ww
         wmid = PW - M - x - 150
         c.rect(x, y0, wmid, h)
-        c.setFont('CB', 8); c.setFillColor(INK)
-        c.drawString(x + 5, y0 + h - 12, (pano['kod'] + ' | ' + pano['ad']) if pano else f'Проект {pr.get("no")}')
-        c.setFont('C', 6.6); c.setFillColor(GREY); c.drawString(x + 5, y0 + h - 23, section[:44] + ('…' if len(section) > 44 else ''))
-        c.drawString(x + 5, y0 + 5, f'Источник: {pr.get("kaynak_bom", "")}'[:80])
+        c.setFillColor(INK)
+        yaz(c, x + 5, y0 + h - 12, (pano['kod'] + ' | ' + pano['ad']) if pano else f'Проект {pr.get("no")}', 'CB', 8, wmid - 10, 'l', 6)
+        c.setFillColor(GREY)
+        yaz(c, x + 5, y0 + h - 23, section, 'C', 6.6, wmid - 10, 'l', 5.6)
+        yaz(c, x + 5, y0 + 5, f'Источник: {pr.get("kaynak_bom", "")}', 'C', 6.6, wmid - 10, 'l', 5.6)
         x += wmid
         cells = [('Проект', pr.get('no', '')), ('Лист', f'{self.n} / {self.total or "?"}'), ('Рев.', pr.get('rev', '')), ('Дата', pr.get('tarih', ''))]
         cw = 150 / 4
         for i, (lab, val) in enumerate(cells):
             c.rect(x + i * cw, y0, cw, h)
             c.setFont('C', 6); c.setFillColor(GREY); c.drawCentredString(x + i * cw + cw / 2, y0 + h - 10, lab)
-            c.setFont('CB', 7.2 if lab != 'Лист' else 7.6); c.setFillColor(INK)
-            c.drawCentredString(x + i * cw + cw / 2, y0 + 16, str(val))
+            c.setFillColor(INK)
+            yaz(c, x + i * cw + cw / 2, y0 + 16, str(val), 'CB', 7.2 if lab != 'Лист' else 7.6, cw - 4, 'c', 5.5)
         c.setFillColor(INK)
 
     def end(self):
@@ -495,7 +509,7 @@ def front_sketch(c, x, y, w, h, k, kapi, title=None, open_=False):
                     c.rect(cx - 5, cy - 5, 10, 10, fill=1)
                 else:
                     c.circle(cx, cy, 5, fill=1)
-                c.setFillColor(INK); c.setFont('C', 4.6); c.drawCentredString(cx, cy - 11, (e.get('yazi') or e['poz'])[:12])
+                c.setFillColor(INK); yaz(c, cx, cy - 11, e.get('yazi') or e['poz'], 'C', 4.6, 25)
         # uyarı işareti
         c.setFillColor(colors.HexColor('#F2B705')); tx, ty = x0 + ww / 2, y0 + hh * 0.55
         c.setStrokeColor(INK); p = c.beginPath(); p.moveTo(tx - 7, ty - 6); p.lineTo(tx + 7, ty - 6); p.lineTo(tx, ty + 7); p.close()
@@ -625,9 +639,10 @@ def pano_yerlesim(doc, p, sorun):
             if by < y0 + 40:
                 break
             c.setFillColor(colors.HexColor('#DDE3EA')); c.setStrokeColor(INK); c.rect(bx, by, bw, bh, fill=1)
-            c.setFillColor(INK); c.setFont('CB', 6); c.drawCentredString(bx + bw / 2, by + bh - 9, d['poz'])
-            c.setFont('C', 5); c.drawCentredString(bx + bw / 2, by + 9, (re.sub(r'\s+', ' ', d.get('cihaz') or ''))[:18])
-            c.drawCentredString(bx + bw / 2, by + 3, f'{fmt(d.get("In")) or ""}A' if d.get('In') else '')
+            c.setFillColor(INK)
+            yaz(c, bx + bw / 2, by + bh - 9, d['poz'], 'CB', 6, bw - 3)
+            yaz(c, bx + bw / 2, by + 10, re.sub(r'\s+', ' ', d.get('cihaz') or ''), 'C', 5, bw - 3)
+            yaz(c, bx + bw / 2, by + 3, f'{fmt(d.get("In")) or ""}A' if d.get('In') else '', 'C', 5, bw - 3)
         rows_used = (len(blok) - 1) // max(1, int(inner_w // (bw + 4))) + 1
         ytop -= rows_used * (bh + 4) + 8
     # din sıraları
@@ -649,12 +664,19 @@ def pano_yerlesim(doc, p, sorun):
             d = din[i]; m_ = modul(d); bx = inner_x + used * mw
             fc = {'mcb': '#FFFFFF', 'rccb': '#E3F2FD', 'rcbo': '#E8F5E9', 'opn': '#FFF3E0'}.get(d['kategori'], '#FFFFFF')
             c.setFillColor(colors.HexColor(fc)); c.setStrokeColor(INK); c.rect(bx, ycur - 26, m_ * mw, 24, fill=1)
-            c.setFillColor(INK); c.setFont('CB', 4.8); c.drawCentredString(bx + m_ * mw / 2, ycur - 9, d['poz'])
-            c.setFont('C', 4.4)
+            c.setFillColor(INK)
             lab = f'{d.get("egri") or ""}{fmt(d.get("In")) or ""}'
-            c.drawCentredString(bx + m_ * mw / 2, ycur - 17, lab)
-            if d.get('rcd_mA'):
-                c.drawCentredString(bx + m_ * mw / 2, ycur - 23, f'{d["rcd_mA"]}mA')
+            kw = m_ * mw - 1.5                       # kutu iç genişliği
+            if kw < pdfmetrics.stringWidth(d['poz'], 'CB', 3.6):
+                # dar (1 modül) kutu: yazı dikey, kutu boyunca
+                c.saveState(); c.translate(bx + m_ * mw / 2 + 1.5, ycur - 14); c.rotate(90)
+                yaz(c, 0, 0, f'{d["poz"]} {lab}'.strip(), 'CB', 4.4, 22, 'c', 3.2)
+                c.restoreState()
+            else:
+                yaz(c, bx + m_ * mw / 2, ycur - 9, d['poz'], 'CB', 4.8, kw)
+                yaz(c, bx + m_ * mw / 2, ycur - 17, lab, 'C', 4.4, kw)
+                if d.get('rcd_mA'):
+                    yaz(c, bx + m_ * mw / 2, ycur - 23, f'{d["rcd_mA"]}mA', 'C', 4.4, kw)
             used += m_; i += 1
         c.setFont('C', 5.5); c.setFillColor(GREY); c.drawRightString(inner_x + inner_w, ycur - 34, f'ряд {r + 1}: {fmt(used)}/{fmt(per)} мод.')
         ycur -= gap + 8
